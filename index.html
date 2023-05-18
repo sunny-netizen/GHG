@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sankey Diagram with D3.js</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/d3-array@1"></script>
+    <script src="https://unpkg.com/d3-collection@1"></script>
+    <script src="https://unpkg.com/d3-path@1"></script>
+    <script src="https://unpkg.com/d3-shape@1"></script>
+    <script src="https://unpkg.com/d3-sankey@0"></script>
+</head>
+<body>
+    <div id="sankey-diagram"></div>
+
+    <script>
+        // Width and height of the diagram
+        var width = 500;
+        var height = 300;
+
+        // Create SVG container
+        var svg = d3.select("#sankey-diagram")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        // Load data from CSV
+        d3.csv("santamonica_transportation_20230515.csv").then(function (data) {
+            console.log(data);
+            // Create unique nodes array
+            var nodes = [];
+            data.forEach(function (d) {
+                if (!nodes.find(function (n) { return n.name === d.mode; })) {
+                    nodes.push({ name: d.mode });
+                }
+                if (!nodes.find(function (n) { return n.name === d.travel_bounds; })) {
+                    nodes.push({ name: d.travel_bounds });
+                }
+            });
+
+            // Create a Sankey generator
+            var sankey = d3.sankey()
+                .nodeWidth(20)
+                .nodePadding(10)
+                .size([width, height]);
+
+            // Set up the Sankey diagram layout
+            var { nodes: sankeyNodes, links } = sankey({
+                nodes: nodes,
+                links: data.map(function (d) {
+                    return {
+                        source: nodes.find(function (n) { return n.name === d.mode; }),
+                        target: nodes.find(function (n) { return n.name === d.travel_bounds; }),
+                        value: parseFloat(d.gpc_co2e_tons) // Use 'gpc_co2e_tons' as the value
+                    };
+                })
+            });
+
+            // Render the Sankey diagram
+            svg.append("g")
+                .selectAll("rect")
+                .data(sankeyNodes)
+                .join("rect")
+                .attr("x", function (d) { return d.x0; })
+                .attr("y", function (d) { return d.y0; })
+                .attr("height", function (d) { return d.y1 - d.y0; })
+                .attr("width", sankey.nodeWidth())
+                .attr("fill", "#ccc");
+
+            svg.append("g")
+                .selectAll("path")
+                .data(links)
+                .join("path")
+                .attr("d", d3.sankeyLinkHorizontal())
+                .attr("stroke", "#000")
+                .attr("stroke-width", function (d) { return Math.max(1, d.width); })
+                .attr("fill", "none");
+        });
+    </script>
+</body>
+</html>
