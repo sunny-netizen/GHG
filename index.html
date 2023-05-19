@@ -14,14 +14,18 @@
 
     <script>
         // Width and height of the diagram
-        var width = 500;
-        var height = 300;
+        var width = 800;
+        var height = 600;
 
         // Create SVG container
         var svg = d3.select("#sankey-diagram")
             .append("svg")
             .attr("width", width)
             .attr("height", height);
+
+        // Define colors for nodes and links
+        var nodeColors = ['lightblue','grey','grey','grey','blue','purple','orange','green','red']
+        var linkColors = ['lightblue','green','blue','green','red', 'purple']
 
         // Load data from CSV
         d3.csv("santamonica_transportation_20230515.csv").then(function (data) {
@@ -55,6 +59,8 @@
                 })
             });
 
+            
+
             // Render the Sankey diagram
             svg.append("g")
                 .selectAll("rect")
@@ -63,18 +69,33 @@
                 .attr("x", function (d) { return d.x0; })
                 .attr("y", function (d) { return d.y0; })
                 .attr("height", function (d) { return d.y1 - d.y0; })
-                .attr("width", sankey.nodeWidth())
-                .attr("fill", "#ccc");
+                .attr("width", 5*sankey.nodeWidth())
+                .attr("fill", function (d, i) { return nodeColors[i % nodeColors.length]; });
 
             svg.append("g")
                 .selectAll("path")
                 .data(links)
                 .join("path")
                 .attr("d", d3.sankeyLinkHorizontal())
-                .attr("stroke", "#000")
+                .attr("stroke", function (d) { return linkColors[d.source.index % linkColors.length]; })
                 .attr("stroke-width", function (d) { return Math.max(1, d.width); })
                 .attr("fill", "none");
+
+
+                svg.append("g")
+    .selectAll("text")
+    .data(sankeyNodes)
+    .join("text")
+    .attr("x", function (d) { return d.x0 + 5; })
+    .attr("y", function (d) { return (d.y0 + d.y1) / 2; })
+    .attr("dy", "0.35em")
+    .style("font-size", "12px")
+    .text(function (d) { return d.name; })
+    .attr("fill", "black");
         });
+
+
+
     </script>
 </body>
 </html>
