@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Sankey Diagram with D3.js</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -9,6 +10,7 @@
     <script src="https://unpkg.com/d3-shape@1"></script>
     <script src="https://unpkg.com/d3-sankey@0"></script>
 </head>
+
 <body>
     <div id="sankey-diagram"></div>
 
@@ -24,12 +26,35 @@
             .attr("height", height);
 
         // Define colors for nodes and links
-        var nodeColors = ['lightblue','grey','grey','grey','blue','purple','orange','green','red']
-        var linkColors = ['lightblue','green','blue','green','red', 'purple']
+        var nodeColors = [
+            'blue',
+            'black',
+            'grey',
+            'silver',
+            'orange',
+            'red',
+            'green',
+            'purple'
+        ]
+        var linkColors = [
+            'lightblue',
+            'black',
+            'grey',
+            'silver',
+            'orange',
+            'red',
+            'green',
+            'purple'
+
+        ]
 
         // Load data from CSV
-        d3.csv("santamonica_transportation_20230515.csv").then(function (data) {
-            console.log(data);
+        d3.csv("santamonica_transportation_20230515.csv").then(function (rawdata) {
+            console.log(rawdata);
+            var data = rawdata.filter(function (d) {
+                return d.travel_bounds !== "TOTAL";
+            });
+
             // Create unique nodes array
             var nodes = [];
             data.forEach(function (d) {
@@ -43,9 +68,9 @@
 
             // Create a Sankey generator
             var sankey = d3.sankey()
-                .nodeWidth(20)
-                .nodePadding(10)
-                .size([width, height]);
+                .nodeWidth(5)
+                .nodePadding(40)
+                .size([width - 50, height - 50]);
 
             // Set up the Sankey diagram layout
             var { nodes: sankeyNodes, links } = sankey({
@@ -59,18 +84,10 @@
                 })
             });
 
-            
+
 
             // Render the Sankey diagram
-            svg.append("g")
-                .selectAll("rect")
-                .data(sankeyNodes)
-                .join("rect")
-                .attr("x", function (d) { return d.x0; })
-                .attr("y", function (d) { return d.y0; })
-                .attr("height", function (d) { return d.y1 - d.y0; })
-                .attr("width", 5*sankey.nodeWidth())
-                .attr("fill", function (d, i) { return nodeColors[i % nodeColors.length]; });
+
 
             svg.append("g")
                 .selectAll("path")
@@ -81,21 +98,42 @@
                 .attr("stroke-width", function (d) { return Math.max(1, d.width); })
                 .attr("fill", "none");
 
+            svg.append("g")
+                .selectAll("rect")
+                .data(sankeyNodes)
+                .join("rect")
+                .attr("x", function (d) { return d.x0; })
+                .attr("y", function (d) { return d.y0; })
+                .attr("height", function (d) { return d.y1 - d.y0; })
+                .attr("width", 5 * sankey.nodeWidth())
+                .attr("stroke", "black") // Set the border color
+                .attr("stroke-width", 1) // Set the border thickness
+                .attr("fill", function (d, i) { return nodeColors[i % nodeColors.length]; });
 
-                svg.append("g")
-    .selectAll("text")
-    .data(sankeyNodes)
-    .join("text")
-    .attr("x", function (d) { return d.x0 + 5; })
-    .attr("y", function (d) { return (d.y0 + d.y1) / 2; })
-    .attr("dy", "0.35em")
-    .style("font-size", "12px")
-    .text(function (d) { return d.name; })
-    .attr("fill", "black");
+            console.log(sankeyNodes[0].name.length)
+
+
+            svg.append("g")
+                .selectAll("text")
+                .data(sankeyNodes)
+                .join("text")
+                .attr("x", function (d) {
+                    if (d.x0 === 0) {
+                        return d.x0 + 40; // Adjust x-coordinate for "CAR" label
+                    } else {
+                        return d.x0 - 20 - 7 * d.name.length; // Adjust x-coordinate for other labels
+                    }
+                })
+                .attr("y", function (d) { return (d.y0 + d.y1) / 2; })
+                .attr("dy", "0.35em")
+                .style("font-size", "12px")
+                .text(function (d) { return d.name; })
+                .attr("fill", "black");
         });
 
 
 
     </script>
 </body>
+
 </html>
