@@ -1,22 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sankey Diagram with D3.js</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="https://unpkg.com/d3-array@1"></script>
-    <script src="https://unpkg.com/d3-collection@1"></script>
-    <script src="https://unpkg.com/d3-path@1"></script>
-    <script src="https://unpkg.com/d3-shape@1"></script>
     <script src="https://unpkg.com/d3-sankey@0"></script>
+
+    <style>
+        text {
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            font-size: 16px;
+        }
+    </style>
+
 </head>
 
 <body>
+
     <div id="sankey-diagram"></div>
+
 
     <script>
         // Width and height of the diagram
-        var width = 800;
+        var width = 1100;
         var height = 600;
 
         // Create SVG container
@@ -25,19 +34,29 @@
             .attr("width", width)
             .attr("height", height);
 
+        var base = svg.append("g")
+            .append("rect")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", width)
+            .attr("height", height)
+            .style("stroke", "black")
+            .style("stroke-width", 3)
+            .style("fill", "none");
+
         // Define colors for nodes and links
         var nodeColors = [
-            'blue',
+            'none', //'lightblue',
             'black',
             'grey',
             'silver',
-            'orange',
-            'red',
-            'green',
-            'purple'
+            'none', //'orange',
+            'none', //'red',
+            'none', //'green',
+            'none', //'purple'
         ]
         var linkColors = [
-            'lightblue',
+            '#B0CFDE', //
             'black',
             'grey',
             'silver',
@@ -68,9 +87,9 @@
 
             // Create a Sankey generator
             var sankey = d3.sankey()
-                .nodeWidth(5)
-                .nodePadding(40)
-                .size([width - 50, height - 50]);
+                .nodeWidth(2)
+                .nodePadding(30)
+                .size([width - 500, height - 100]);
 
             // Set up the Sankey diagram layout
             var { nodes: sankeyNodes, links } = sankey({
@@ -84,12 +103,12 @@
                 })
             });
 
+            const offsetX = 150;
+            const offsetY = 40;
 
-
-            // Render the Sankey diagram
-
-
+            // Render the Sankeyå diagram
             svg.append("g")
+                .attr("transform", "translate(" + offsetX + "," + offsetY + ")")
                 .selectAll("path")
                 .data(links)
                 .join("path")
@@ -99,6 +118,7 @@
                 .attr("fill", "none");
 
             svg.append("g")
+                .attr("transform", "translate(" + offsetX + "," + offsetY + ")")
                 .selectAll("rect")
                 .data(sankeyNodes)
                 .join("rect")
@@ -106,29 +126,50 @@
                 .attr("y", function (d) { return d.y0; })
                 .attr("height", function (d) { return d.y1 - d.y0; })
                 .attr("width", 5 * sankey.nodeWidth())
-                .attr("stroke", "black") // Set the border color
-                .attr("stroke-width", 1) // Set the border thickness
+                //.attr("stroke", "black") // Set the border color
+                //.attr("stroke-width", 1) // Set the border thickness
                 .attr("fill", function (d, i) { return nodeColors[i % nodeColors.length]; });
 
-            console.log(sankeyNodes[0].name.length)
-
-
             svg.append("g")
+                .attr("transform", "translate(" + offsetX + "," + offsetY + ")")
                 .selectAll("text")
                 .data(sankeyNodes)
                 .join("text")
                 .attr("x", function (d) {
                     if (d.x0 === 0) {
-                        return d.x0 + 40; // Adjust x-coordinate for "CAR" label
+                        return d.x0 - 5; // Adjust x-coordinate for "CAR" label
                     } else {
-                        return d.x0 - 20 - 7 * d.name.length; // Adjust x-coordinate for other labels
+                        return d.x0 - 10; // Adjust x-coordinate for other labels
                     }
                 })
-                .attr("y", function (d) { return (d.y0 + d.y1) / 2; })
+                .attr("text-anchor", "end")
+                .attr("y", function (d) { return (d.y0 + d.y1) / 2 })
+                /*
+                .attr("y", function (d) { 
+                    if (d.name === "CYCLING" || d.name === "ON FOOT" || d.name === "TRAM") {
+                        return 7 + (d.y0 + d.y1) / 2;
+                    } else {
+                        return (d.y0 + d.y1) / 2;
+        }}) */
                 .attr("dy", "0.35em")
-                .style("font-size", "12px")
+                //.style("font-size", "14px")
+                //.style("font-family", "Arial")
                 .text(function (d) { return d.name; })
                 .attr("fill", "black");
+
+
+            /*
+                        // Append a text element
+                        svg.append("text")
+                            .attr("x", width - 100) // x-coordinate of the text
+                            .attr("y", 100) // y-coordinate of the text
+                            .text("Hello, D3!") // text content
+                            .style("font-size", "14px") // font size
+                            .style("fill", "black"); // text color
+            
+            */
+
+
         });
 
 
