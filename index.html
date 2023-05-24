@@ -46,17 +46,17 @@
 
         // Define colors for nodes and links
         var nodeColors = [
-            'none', //'lightblue',
+            '#4682B4', //'lightblue',
             'black',
             'grey',
             'silver',
-            'none', //'orange',
-            'none', //'red',
-            'none', //'green',
-            'none', //'purple'
+            '#F08000', //'orange',
+            '#CB4335', //'red',
+            '#196F3D', //'green',
+            '#6C3483', //'purple'
         ]
         var linkColors = [
-            '#B0CFDE', //
+            '#B0CFDE',//'lightblue',//'#89CFF0', //, //,//'#87CEEB',
             'black',
             'grey',
             'silver',
@@ -88,7 +88,7 @@
             // Create a Sankey generator
             var sankey = d3.sankey()
                 .nodeWidth(2)
-                .nodePadding(30)
+                .nodePadding(25)
                 .size([width - 500, height - 100]);
 
             // Set up the Sankey diagram layout
@@ -115,6 +115,7 @@
                 .attr("d", d3.sankeyLinkHorizontal())
                 .attr("stroke", function (d) { return linkColors[d.source.index % linkColors.length]; })
                 .attr("stroke-width", function (d) { return Math.max(1, d.width); })
+                .attr("stroke-opacity", "0.5")
                 .attr("fill", "none");
 
             svg.append("g")
@@ -136,21 +137,33 @@
                 .data(sankeyNodes)
                 .join("text")
                 .attr("x", function (d) {
-                    if (d.x0 === 0) {
-                        return d.x0 - 5; // Adjust x-coordinate for "CAR" label
+                    //if (d.x0 === 0) {
+                    if (d.name === "CYCLING" || d.name === "ON FOOT" || d.name === "TRAM") {
+                        return d.x0 - 0; // Adjust x-coordinate for mode
+                    } else if (d.name === "AUTOMOBILE" || d.name === "BUS" ){
+                        return d.x0 + 15 // Adjust x-coordinate for mode
                     } else {
-                        return d.x0 - 10; // Adjust x-coordinate for other labels
+                        return d.x0 - 10; // Adjust x-coordinate for travel_bounds
                     }
                 })
-                .attr("text-anchor", "end")
-                .attr("y", function (d) { return (d.y0 + d.y1) / 2 })
-                /*
+                .attr("text-anchor", function (d) {
+                    //if (d.x0 === 0) {
+                        if (d.name === "CYCLING" || d.name === "ON FOOT" || d.name === "TRAM") {
+                        return "end"; // Adjust x-coordinate for mode
+                    } else if (d.name === "AUTOMOBILE" || d.name === "BUS" ){
+                        return "start"; 
+                    } else {
+                        return "end"; // Adjust x-coordinate for travel_bounds
+                    }
+                })
+                //.attr("y", function (d) { return (d.y0 + d.y1) / 2 })
+                
                 .attr("y", function (d) { 
                     if (d.name === "CYCLING" || d.name === "ON FOOT" || d.name === "TRAM") {
-                        return 7 + (d.y0 + d.y1) / 2;
+                        return 0 + (d.y0 + d.y1) / 2;
                     } else {
                         return (d.y0 + d.y1) / 2;
-        }}) */
+        }}) /* */
                 .attr("dy", "0.35em")
                 //.style("font-size", "14px")
                 //.style("font-family", "Arial")
